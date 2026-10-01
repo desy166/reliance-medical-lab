@@ -1,0 +1,164 @@
+.about {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  padding: 100px 7%;
+  background: #ffffff;
+}
+
+.about-image {
+  flex: 1;
+  min-height: 430px;
+  background: #174a8b;
+  border-radius: 80px 25px 25px 25px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.about-image::before {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border: 35px solid #d52b3f;
+  border-radius: 50%;
+  left: -100px;
+  bottom: -100px;
+}
+
+.about-card {
+  width: 280px;
+  padding: 35px;
+  background: #ffffff;
+  border-radius: 15px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+}
+
+.about-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fcecef;
+  color: #d52b3f;
+  font-size: 35px;
+  border-radius: 50%;
+}
+
+.about-card h3 {
+  color: #174a8b;
+  margin-bottom: 10px;
+}
+
+.about-card p {
+  color: #666;
+}
+
+.experience-card {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  background: #d52b3f;
+  color: #ffffff;
+  padding: 18px 22px;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.experience-card strong {
+  font-size: 25px;
+}
+
+.experience-card span {
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.about-content {
+  flex: 1;
+}
+
+.section-subtitle {
+  color: #d52b3f;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.about-content h2 {
+  color: #174a8b;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.about-content h2 span {
+  color: #d52b3f;
+}
+
+.about-content p {
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.about-points {
+  margin: 25px 0;
+}
+
+.about-points div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.about-points strong {
+  color: #d52b3f;
+  font-size: 18px;
+}
+
+.about-points span {
+  color: #444;
+}
+
+.about-button {
+  display: inline-block;
+  background: #174a8b;
+  color: #ffffff;
+  padding: 14px 24px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+}
+
+.about-button:hover {
+  background: #d52b3f;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .about {
+    flex-direction: column;
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .about-image,
+  .about-content {
+    width: 100%;
+  }
+}
