@@ -1,0 +1,133 @@
+.booking {
+    display: flex;  
+    gap: 70px;
+    padding: 100px 7%;
+    background: white;
+}
+.booking-info{
+    flex: 1;
+    padding-top: 20px;
+}
+.booking-info h2{
+    color: #174a8b;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+.booking-info h2 span{
+    color: #d52b3f;
+}
+.booking-info p{
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+.booking-points{
+    margin: 25px 0;
+}
+.booking-points div{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.booking-points strong{
+    color: #d52b3f;
+    font-size: 18px;
+}
+.booking-points span{
+    color: #444;
+}
+.booking-form{
+    flex: 1;
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+}
+.form-row{
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+.form-group{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.form-group label{
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.form-group textarea{
+    resize: vertical;
+    min-height: 100px;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline: none;
+    border-color: #d52b3f;
+}
+.booking-form button{
+    background: #d52b3f;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+.booking-form button:hover{
+    background: #c02a3a;
+}
+
+@media (max-width: 900px) {
+    .booking {
+        flex-direction: column;
+        gap: 32px;
+        padding: 80px 6%;
+    }
+
+    .booking-info {
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .booking {
+        gap: 24px;
+        padding: 64px 5%;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .booking-form {
+        width: 100%;
+        padding: 22px 18px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .booking-form button {
+        width: 100%;
+    }
+}
