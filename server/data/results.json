@@ -1,0 +1,14 @@
+[
+  {
+    "referenceNumber": "RML-2026-00001",
+    "patientName": "john doe",
+    "age": 25,
+    "sex": "male",
+    "sampleDate": "2026-09-14",
+    "testName": "malariaTest",
+    "result": "negative",
+    "remarks": "no malaria parasites detected.",
+    "scientist": "Dr.example",
+    "createdAt": "2026-10-12T00:11:02.915Z"
+  }
+]
