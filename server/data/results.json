@@ -10,5 +10,17 @@
     "remarks": "no malaria parasites detected.",
     "scientist": "Dr.example",
     "createdAt": "2026-10-12T00:11:02.915Z"
+  },
+  {
+    "referenceNumber": "RML-2026-00002",
+    "patientName": "omorogbe destiny",
+    "age": 14,
+    "sex": "Male",
+    "sampleDate": "2026-10-17",
+    "testName": "Blood Test",
+    "result": "high",
+    "remarks": "asfg",
+    "scientist": "osas",
+    "createdAt": "2026-10-16T09:47:58.214Z"
   }
 ]

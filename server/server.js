@@ -72,8 +72,19 @@ app.post('/api/results', (req, res) => {
     result: newResult,
   });
 });
-
+app.get("/api/results",(req, res) =>{
+    try{
+    const results = readResults();
+    res.json(results);
+ } catch (error){
+    res.status(500).json({
+        message: "Unable to retrieve laboratory results.",
+    });
+ }
+});
 app.get('/api/results/:referenceNumber', (req, res) => {
+ 
+
   const reference = req.params.referenceNumber.toUpperCase();
   const results = readResults();
   const result = results.find((r) => r.referenceNumber === reference);

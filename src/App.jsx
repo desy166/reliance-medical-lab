@@ -6,6 +6,8 @@ import Booking from './components/Booking'
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Results from './components/Results';
+import AdminDashboard from './components/AdminDashboard';
+
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
       <Booking />
       <Contact />
       <Footer />
+      <AdminDashboard />  
     </>
   );
 }

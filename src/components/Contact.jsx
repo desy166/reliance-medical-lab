@@ -41,7 +41,7 @@ function Contact() {
             <div className="contact-icon">🕒</div>
             <div>
               <h3>Opening Hours</h3>
-              <p>Monday - Saturday: 8:00 AM - 6:00 PM</p>
+              <p>Monday - Saturday: 7:30 AM - 6:00 PM</p>
               <p>Sunday: 12:00 PM - 6:00 PM</p>
             </div>
           </div>
