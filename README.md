@@ -1,5 +1,18 @@
 # React + Vite
 
+## Admin login configuration
+
+The API reads admin credentials from a `.env` file in the project root. Copy
+`.env.example` to `.env`, then set:
+
+- `ADMIN_USERNAME` to your chosen admin username.
+- `ADMIN_PASSWORD_HASH` to a bcrypt hash of your chosen password. Do not put
+	the plain-text password in this setting.
+- `JWT_SECRET` to a long, random secret used to sign login tokens.
+
+The `.env` file is ignored by Git. Restart the API after changing it with
+`npm run server` or `npm run server-dev`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

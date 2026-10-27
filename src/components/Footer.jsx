@@ -1,5 +1,5 @@
 
-import { Plus } from "lucide-react";
+import logo from "../assets/file_00000000bff0820ab8a502466c888f49.png";
 import "./Footer.css";
 function Footer() {
     return(
@@ -7,7 +7,7 @@ function Footer() {
             <div className="footer-content">
                 <div className="footer-brand">
                     <div className="footer-logo">
-                        <Plus />
+                        <img className="footer-logo-mark" src={logo} alt="Reliance Medical Laboratory logo" />
                         <div>
                             <h2>RELIANCE</h2>
                             <p>Medical

@@ -1,6 +1,8 @@
+import logo from "../assets/file_00000000bff0820ab8a502466c888f49.png";
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import './Navbar.css';
+
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,8 +14,8 @@ function Navbar() {
   return (
     <nav className="navbar" aria-label="Main navigation">
       <div className="navbar-logo">
-        <img src="/logo.png" alt="Logo" />
-        <span className="logo-icon">+</span>
+        <img  className="navbar-logo"src={logo} alt="logo" />
+        <span className="logo-icon"></span>
         <div className="logo-text">
           <h2>RELIANCE</h2>
           <p>medical laboratory</p>

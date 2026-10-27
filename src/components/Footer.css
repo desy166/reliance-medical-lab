@@ -22,10 +22,13 @@
   margin-bottom: 18px;
 }
 
-.footer-logo > span,
-.footer-logo svg {
-  color: #d52b3f;
-  font-size: 35px;
+.footer-logo-mark {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 4px;
+  background: #ffffff;
+  object-fit: contain;
 }
 
 .footer-logo h2 {

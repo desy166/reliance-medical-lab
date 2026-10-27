@@ -10,6 +10,10 @@ import AdminDashboard from './components/AdminDashboard';
 
 
 function App() {
+  if (window.location.pathname === '/admin') {
+    return <AdminDashboard />;
+  }
+
   return (
     <>
       <Navbar />
@@ -20,7 +24,6 @@ function App() {
       <Booking />
       <Contact />
       <Footer />
-      <AdminDashboard />  
     </>
   );
 }

@@ -22,5 +22,17 @@
     "remarks": "asfg",
     "scientist": "osas",
     "createdAt": "2026-10-16T09:47:58.214Z"
+  },
+  {
+    "referenceNumber": "RML-2026-00003",
+    "patientName": "ugyufu",
+    "age": 14,
+    "sex": "Male",
+    "sampleDate": "2026-10-26",
+    "testName": "Blood Test",
+    "result": "hhry",
+    "remarks": "ghvv",
+    "scientist": "dest",
+    "createdAt": "2026-10-26T21:15:23.035Z"
   }
 ]
