@@ -7,6 +7,10 @@ import {
   LayoutDashboard,
   Menu,
   Search,
+  Upload,
+  UserPlus,
+  CircleCheck,
+  FileText,
   X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
@@ -140,6 +144,7 @@ function AdminDashboard() {
 
   const [activePage, setActivePage] = useState("Dashboard");
   const [authToken, setAuthToken] = useState("");
+  const [staffUser, setStaffUser] = useState(null);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginPending, setLoginPending] = useState(false);
@@ -163,6 +168,33 @@ function AdminDashboard() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [resultsError, setResultsError] = useState("");
   const [selectedResult, setSelectedResult] = useState(null);
+  const [uploadForm, setUploadForm] = useState({
+    patientId: "",
+    patientName: "",
+    testName: "",
+    testDate: "",
+  });
+  const [pdfFile, setPdfFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [uploadedPatientCredentials, setUploadedPatientCredentials] = useState(null);
+  const [patientForm, setPatientForm] = useState({
+    fullName: "",
+    dateOfBirth: "",
+    sex: "",
+    phone: "",
+    email: "",
+    address: "",
+  });
+  const [registeredPatient, setRegisteredPatient] = useState(null);
+  const [patientFormError, setPatientFormError] = useState("");
+  const [patientFormSaving, setPatientFormSaving] = useState(false);
+  const [registeredPatients, setRegisteredPatients] = useState([]);
+  const [patientsError, setPatientsError] = useState("");
+  const [pendingReports, setPendingReports] = useState([]);
+  const [uploadedReports, setUploadedReports] = useState([]);
+  const [reviewError, setReviewError] = useState("");
 
   const handleAdminLogin = async (event) => {
     event.preventDefault();
@@ -170,7 +202,7 @@ function AdminDashboard() {
     setLoginError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/admin/login", {
+      const response = await fetch("http://localhost:5000/api/staff/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginForm),
@@ -185,6 +217,8 @@ function AdminDashboard() {
       }
 
       setAuthToken(data.token);
+      setStaffUser(data.user);
+      setActivePage(data.user.role === "scientist" ? "Review Results" : "Dashboard");
       setLoginForm({ username: "", password: "" });
     } catch (error) {
       setLoginError(
@@ -231,7 +265,10 @@ function AdminDashboard() {
       }
 
       setSuccessMessage(data.message);
-      setCreatedResult(data.result);
+      setCreatedResult({
+        ...data.result,
+        patientAccessCode: data.patientAccessCode,
+      });
       setFormData({
         patientName: "",
         age: "",
@@ -250,6 +287,178 @@ function AdminDashboard() {
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUploadPDF = async (event) => {
+    event.preventDefault();
+    setUploading(true);
+    setUploadMessage("");
+    setUploadError("");
+    setUploadedPatientCredentials(null);
+
+    try {
+      const body = new FormData();
+      if (!pdfFile) throw new Error("Select a PDF report to upload.");
+      body.append("resultPDF", pdfFile);
+      Object.entries(uploadForm).forEach(([key, value]) => body.append(key, value));
+
+      const response = await fetch("http://localhost:5000/api/results/upload-pdf", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+        body,
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to upload PDF result.");
+      }
+
+      setUploadMessage(data.message || "PDF result uploaded successfully.");
+      setUploadedPatientCredentials({
+        patientId: data.patient?.patientId || uploadForm.patientId,
+        patientName: data.patient?.fullName || uploadForm.patientName,
+        patientPin: data.patientPin,
+        pinAlreadyIssued: data.pinAlreadyIssued,
+      });
+      setUploadForm({ patientId: "", patientName: "", testName: "", testDate: "" });
+      setPdfFile(null);
+      event.target.reset();
+      fetchUploadedReports();
+    } catch (error) {
+      setUploadError(
+        error.message === "Failed to fetch"
+          ? "Cannot connect to the API. Make sure the server is running."
+          : error.message
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRegisterPatient = async (event) => {
+    event.preventDefault();
+    setPatientFormSaving(true);
+    setPatientFormError("");
+    setRegisteredPatient(null);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/patients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(patientForm),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to register patient.");
+      }
+
+      setRegisteredPatient(data.patient);
+      setRegisteredPatients((patients) => [data.patient, ...patients]);
+      setPatientForm({ fullName: "", dateOfBirth: "", sex: "", phone: "", email: "", address: "" });
+    } catch (error) {
+      setPatientFormError(
+        error.message === "Failed to fetch"
+          ? "Cannot connect to the API. Make sure the server is running."
+          : error.message
+      );
+    } finally {
+      setPatientFormSaving(false);
+    }
+  };
+
+  const fetchRegisteredPatients = async () => {
+    setPatientsError("");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/patients", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load registered patients.");
+      }
+
+      setRegisteredPatients(data);
+    } catch (error) {
+      setPatientsError(
+        error.message === "Failed to fetch"
+          ? "Unable to connect to the backend. Check that the server is running."
+          : error.message
+      );
+    }
+  };
+
+  const fetchUploadedReports = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/staff/results", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load uploaded reports.");
+      setUploadedReports(data);
+    } catch (error) {
+      setUploadError(error.message);
+    }
+  };
+
+  const fetchPendingReports = async () => {
+    setReviewError("");
+    try {
+      const response = await fetch("http://localhost:5000/api/scientist/results/pending", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load pending reports.");
+      setPendingReports(data);
+    } catch (error) {
+      setReviewError(error.message);
+    }
+  };
+
+  const handleReportReview = async (report, decision) => {
+    const reason = decision === "Rejected"
+      ? window.prompt("Enter the reason for rejecting this report:")
+      : "";
+    if (decision === "Rejected" && !reason?.trim()) return;
+
+    setReviewError("");
+    try {
+      const response = await fetch(`http://localhost:5000/api/scientist/results/${report.id}/review`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ decision, reason }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to update report status.");
+      setPendingReports((reports) => reports.filter((item) => item.id !== report.id));
+    } catch (error) {
+      setReviewError(error.message);
+    }
+  };
+
+  const openUploadedReport = async (report) => {
+    const reportWindow = window.open("about:blank", "_blank");
+    try {
+      const pdfRoute = staffUser?.role === "scientist" ? "scientist" : "staff";
+      const response = await fetch(`http://localhost:5000/api/${pdfRoute}/results/${report.id}/pdf`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!response.ok) throw new Error("Unable to open this PDF report.");
+      const pdfUrl = URL.createObjectURL(await response.blob());
+      if (reportWindow) reportWindow.location.href = pdfUrl;
+      else window.location.href = pdfUrl;
+    } catch (error) {
+      reportWindow?.close();
+      setUploadError(error.message);
     }
   };
 
@@ -279,14 +488,34 @@ function AdminDashboard() {
     }
   };
   useEffect(() => {
-    if (authToken) fetchAllResults();
-  }, [authToken]);
+    if (authToken) {
+      if (staffUser?.role === "scientist") {
+        fetchPendingReports();
+      } else {
+        fetchAllResults();
+        fetchRegisteredPatients();
+        fetchUploadedReports();
+        fetchPendingReports();
+      }
+    }
+  }, [authToken, staffUser]);
 
-  const menuItems = [
+  const staffMenuItems = [
     { name: "Dashboard", icon: <LayoutDashboard size={18} /> },
+    { name: "Register Patient", icon: <UserPlus size={18} /> },
     { name: "Add New Result", icon: <FilePlus2 size={18} /> },
+    { name: "Upload PDF Result", icon: <Upload size={18} /> },
+    { name: "Uploaded Reports", icon: <FileText size={18} /> },
     { name: "Manage Results", icon: <ClipboardList size={18} /> },
   ];
+  const scientistMenuItems = [
+    { name: "Review Results", icon: <CircleCheck size={18} /> },
+  ];
+  const menuItems = staffUser?.role === "scientist"
+    ? scientistMenuItems
+    : staffUser?.role === "secretary"
+      ? [...staffMenuItems, ...scientistMenuItems]
+      : [...staffMenuItems, ...scientistMenuItems];
 
   const filteredResults = allResults.filter((item) => {
     const search = searchTerm.toLowerCase().trim();
@@ -421,13 +650,14 @@ function AdminDashboard() {
             <div className="profile-avatar">RL</div>
             <div className="profile-info">
               <strong>Laboratory Staff</strong>
-              <span>Administrator</span>
+              <span>{staffUser?.role || "admin"}</span>
             </div>
             <button
               type="button"
               className="admin-logout-btn"
               onClick={() => {
                 setAuthToken("");
+                setStaffUser(null);
                 setAllResults([]);
                 setSelectedResult(null);
               }}
@@ -516,6 +746,9 @@ function AdminDashboard() {
                   <>
                     <p>
                       Reference Number: <strong>{createdResult.referenceNumber}</strong>
+                    </p>
+                    <p>
+                      Access Code: <strong>{createdResult.patientAccessCode}</strong>
                     </p>
                     <p>Patient: {createdResult.patientName}</p>
                     <p>Test: {createdResult.testName}</p>
@@ -662,6 +895,365 @@ function AdminDashboard() {
           </section>
         )}
 
+        {activePage === "Register Patient" && (
+          <section className="admin-content">
+            <div className="admin-panel result-entry-panel">
+              <div className="form-heading">
+                <div>
+                  <h2>Register Patient</h2>
+                  <p>Enter patient details to create a patient ID. A portal PIN is issued after the first result PDF is uploaded.</p>
+                </div>
+                <UserPlus size={30} />
+              </div>
+
+              {registeredPatient && (
+                <div className="form-success" role="status">
+                  <strong>Patient registered successfully.</strong>
+                  <p>Patient ID: <strong>{registeredPatient.patientId}</strong></p>
+                  <p>{registeredPatient.fullName}</p>
+                </div>
+              )}
+              {patientFormError && <div className="form-error" role="alert">{patientFormError}</div>}
+
+              <form className="result-entry-form" onSubmit={handleRegisterPatient}>
+                <h3>Patient Information</h3>
+                <div className="form-grid">
+                  <label>
+                    Full Name *
+                    <input
+                      type="text"
+                      value={patientForm.fullName}
+                      onChange={(event) => setPatientForm({ ...patientForm, fullName: event.target.value })}
+                      autoComplete="name"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Date of Birth *
+                    <input
+                      type="date"
+                      value={patientForm.dateOfBirth}
+                      onChange={(event) => setPatientForm({ ...patientForm, dateOfBirth: event.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Sex *
+                    <select
+                      value={patientForm.sex}
+                      onChange={(event) => setPatientForm({ ...patientForm, sex: event.target.value })}
+                      required
+                    >
+                      <option value="">Select sex</option>
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Phone Number *
+                    <input
+                      type="tel"
+                      value={patientForm.phone}
+                      onChange={(event) => setPatientForm({ ...patientForm, phone: event.target.value })}
+                      autoComplete="tel"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Email Address
+                    <input
+                      type="email"
+                      value={patientForm.email}
+                      onChange={(event) => setPatientForm({ ...patientForm, email: event.target.value })}
+                      autoComplete="email"
+                    />
+                  </label>
+
+                  <label>
+                    Address
+                    <input
+                      type="text"
+                      value={patientForm.address}
+                      onChange={(event) => setPatientForm({ ...patientForm, address: event.target.value })}
+                      autoComplete="street-address"
+                    />
+                  </label>
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="form-submit-btn" disabled={patientFormSaving}>
+                    {patientFormSaving ? "Registering..." : "Register Patient"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="admin-panel manage-results-panel">
+              <div className="manage-results-heading">
+                <div>
+                  <h2>Patient Registry</h2>
+                  <p>{registeredPatients.length} registered patient(s)</p>
+                </div>
+                <button type="button" className="refresh-result-btn" onClick={fetchRegisteredPatients}>
+                  Refresh Patients
+                </button>
+              </div>
+
+              {patientsError && <div className="form-error" role="alert">{patientsError}</div>}
+              {!patientsError && registeredPatients.length === 0 ? (
+                <div className="empty-results">
+                  <UserPlus size={36} />
+                  <h3>No patients registered yet</h3>
+                </div>
+              ) : !patientsError && (
+                <div className="results-table-wrapper">
+                  <table className="results-table">
+                    <thead>
+                      <tr>
+                        <th>Patient ID</th>
+                        <th>Full Name</th>
+                        <th>Date of Birth</th>
+                        <th>Phone</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {registeredPatients.map((patient) => (
+                        <tr key={patient.patientId}>
+                          <td>{patient.patientId}</td>
+                          <td>{patient.fullName}</td>
+                          <td>{patient.dateOfBirth}</td>
+                          <td>{patient.phone}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activePage === "Upload PDF Result" && (
+          <section className="admin-content">
+            <div className="admin-panel upload-result-panel">
+              <div className="form-heading">
+                <div>
+                  <h2>Upload PDF Result</h2>
+                  <p>Attach a PDF report to the patient's laboratory record.</p>
+                </div>
+                <Upload size={30} />
+              </div>
+
+              {uploadMessage && (
+                <div className="form-success" role="status">
+                  <strong>{uploadMessage}</strong>
+                  {uploadedPatientCredentials && (
+                    <>
+                      <p>Patient: {uploadedPatientCredentials.patientName}</p>
+                      <p>Patient ID: <strong>{uploadedPatientCredentials.patientId}</strong></p>
+                      {uploadedPatientCredentials.patientPin ? (
+                        <p>Patient portal PIN: <strong>{uploadedPatientCredentials.patientPin}</strong></p>
+                      ) : (
+                        <p>The patient’s existing portal PIN remains valid.</p>
+                      )}
+                      <p>Share any newly issued login details securely. The report remains unavailable until approved.</p>
+                    </>
+                  )}
+                </div>
+              )}
+              {uploadError && <div className="form-error" role="alert">{uploadError}</div>}
+
+              <form className="result-entry-form" onSubmit={handleUploadPDF}>
+                <div className="form-grid">
+                  <label>
+                    Registered Patient *
+                    <select
+                      value={uploadForm.patientId}
+                      onChange={(event) => {
+                        const patient = registeredPatients.find((item) => item.patientId === event.target.value);
+                        setUploadForm({
+                          ...uploadForm,
+                          patientId: patient?.patientId || "",
+                          patientName: patient?.fullName || "",
+                        });
+                      }}
+                      required
+                    >
+                      <option value="">Select a patient</option>
+                      {registeredPatients.map((patient) => (
+                        <option key={patient.patientId} value={patient.patientId}>
+                          {patient.patientId} - {patient.fullName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Patient Name
+                    <input type="text" value={uploadForm.patientName} readOnly />
+                  </label>
+
+                  <label>
+                    Test Name *
+                    <input
+                      type="text"
+                      value={uploadForm.testName}
+                      onChange={(event) => setUploadForm({ ...uploadForm, testName: event.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Test Date *
+                    <input
+                      type="date"
+                      value={uploadForm.testDate}
+                      onChange={(event) => setUploadForm({ ...uploadForm, testDate: event.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="full-width upload-file-field">
+                    Result PDF *
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      onChange={(event) => setPdfFile(event.target.files?.[0] || null)}
+                      required
+                    />
+                    <span>{pdfFile ? pdfFile.name : "Choose a PDF file (maximum 10 MB)"}</span>
+                  </label>
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="form-submit-btn" disabled={uploading || !pdfFile}>
+                    {uploading ? "Uploading PDF..." : "Upload PDF Result"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        )}
+
+        {activePage === "Review Results" && (
+          <section className="admin-content">
+            <div className="admin-panel manage-results-panel">
+              <div className="manage-results-heading">
+                <div>
+                  <h2>Pending Result Review</h2>
+                  <p>Review each uploaded report for accuracy before releasing it to the patient.</p>
+                </div>
+                <button type="button" className="refresh-result-btn" onClick={fetchPendingReports}>
+                  Refresh Queue
+                </button>
+              </div>
+
+              {reviewError && <div className="form-error" role="alert">{reviewError}</div>}
+              {!reviewError && pendingReports.length === 0 ? (
+                <div className="empty-results">
+                  <CircleCheck size={38} />
+                  <h3>No reports awaiting review</h3>
+                </div>
+              ) : !reviewError && (
+                <div className="results-table-wrapper">
+                  <table className="results-table">
+                    <thead>
+                      <tr>
+                        <th>Patient ID</th>
+                        <th>Patient</th>
+                        <th>Test</th>
+                        <th>Test Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pendingReports.map((report) => (
+                        <tr key={report.id}>
+                          <td>{report.patientId}</td>
+                          <td>{report.patientName}</td>
+                          <td>{report.testName}</td>
+                          <td>{report.testDate}</td>
+                          <td className="review-actions">
+                            <button type="button" className="view-result-btn" onClick={() => openUploadedReport(report)}>
+                              <FileText size={16} /> View PDF
+                            </button>
+                            <button type="button" className="approve-report-btn" onClick={() => handleReportReview(report, "Approved")}>
+                              Approve
+                            </button>
+                            <button type="button" className="reject-report-btn" onClick={() => handleReportReview(report, "Rejected")}>
+                              Reject
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activePage === "Uploaded Reports" && (
+          <section className="admin-content">
+            <div className="admin-panel manage-results-panel">
+              <div className="manage-results-heading">
+                <div>
+                  <h2>Uploaded Reports</h2>
+                  <p>Find report PDFs and review any scientist feedback.</p>
+                </div>
+                <button type="button" className="refresh-result-btn" onClick={fetchUploadedReports}>
+                  Refresh Reports
+                </button>
+              </div>
+
+              {uploadError && <div className="form-error" role="alert">{uploadError}</div>}
+              {uploadedReports.length === 0 ? (
+                <div className="empty-results">
+                  <Upload size={38} />
+                  <h3>No uploaded reports found</h3>
+                </div>
+              ) : (
+                <div className="results-table-wrapper">
+                  <table className="results-table">
+                    <thead>
+                      <tr>
+                        <th>Patient ID</th>
+                        <th>Patient</th>
+                        <th>Test</th>
+                        <th>Status</th>
+                        <th>Review Note</th>
+                        <th>PDF</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {uploadedReports.map((report) => (
+                        <tr key={report.id}>
+                          <td>{report.patientId}</td>
+                          <td>{report.patientName}</td>
+                          <td>{report.testName}</td>
+                          <td>{report.status}</td>
+                          <td>{report.rejectionReason || "-"}</td>
+                          <td>
+                            <button type="button" className="view-result-btn" onClick={() => openUploadedReport(report)}>
+                              Open / Print
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {activePage === "Manage Results" && (
           <section className="admin-content">
             <div className="admin-panel manage-results-panel">
@@ -759,6 +1351,9 @@ function AdminDashboard() {
 
                   <p>
                     <strong>Reference:</strong> {selectedResult.referenceNumber}
+                  </p>
+                  <p>
+                    <strong>Access Code:</strong> {selectedResult.accessCode || selectedResult.patientAccessCode || "Not available"}
                   </p>
                   <p>
                     <strong>Patient:</strong> {selectedResult.patientName}

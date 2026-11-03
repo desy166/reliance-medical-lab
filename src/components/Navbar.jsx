@@ -39,6 +39,7 @@ function Navbar() {
           <li><a href="#services" onClick={closeMenu}>Our Services</a></li>
           <li><a href="#about" onClick={closeMenu}>About Us</a></li>
           <li><a href="#contact" onClick={closeMenu}>Contact</a></li>
+          <li><a href="/patient" onClick={closeMenu}>Patient Portal</a></li>
         </ul>
 
         <a href="#booking" className="nav-button" onClick={closeMenu}>Book a Test</a>

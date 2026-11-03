@@ -7,11 +7,15 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Results from './components/Results';
 import AdminDashboard from './components/AdminDashboard';
+import PatientPortal from './components/PatientPortal';
 
 
 function App() {
   if (window.location.pathname === '/admin') {
     return <AdminDashboard />;
+  }
+  if (window.location.pathname === '/patient') {
+    return <PatientPortal />;
   }
 
   return (

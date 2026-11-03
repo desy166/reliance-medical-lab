@@ -1,0 +1,24 @@
+[
+  {
+    "patientId": "RML-P-2026-00001",
+    "fullName": "omorogbe destiny",
+    "dateOfBirth": "2026-10-31",
+    "sex": "Male",
+    "phone": "09070407146",
+    "email": "ddddddd@gmail.com",
+    "address": "benin city",
+    "registeredAt": "2026-10-31T23:34:28.141Z"
+  },
+  {
+    "patientId": "RML-P-2026-00002",
+    "fullName": "omorogbe destiny",
+    "dateOfBirth": "2026-11-01",
+    "sex": "Male",
+    "phone": "09070407146",
+    "email": "ddddddd@gmail.com",
+    "address": "benin city",
+    "pinHash": "$2b$12$dxw2/ILOm5PtMfec6RyF/Ork.WYSiWpSDEIvAgGAIblXaTkicgaI6",
+    "registeredAt": "2026-11-01T08:57:15.988Z",
+    "pinIssuedAt": "2026-11-01T09:27:40.558Z"
+  }
+]

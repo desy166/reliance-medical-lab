@@ -629,6 +629,51 @@
     color: #a51e30;
 }
 
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 250px;
+}
+
+.review-actions button,
+.approve-report-btn,
+.reject-report-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.review-actions .view-result-btn {
+  background: #edf4ff;
+  color: #174a8b;
+}
+
+.approve-report-btn {
+  background: #e7f7ee;
+  color: #14663e;
+}
+
+.reject-report-btn {
+  background: #fff0f1;
+  color: #a51e30;
+}
+
+.review-actions button:hover,
+.approve-report-btn:hover,
+.reject-report-btn:hover {
+  filter: brightness(0.96);
+}
+
 @media (max-width: 600px) { .form-grid{
     grid-template-columns: 1fr;
 }

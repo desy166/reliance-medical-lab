@@ -25,3 +25,6 @@ dist-ssr
 
 .env
 server/.env
+
+.env
+reliance-medical-lab/ .env
